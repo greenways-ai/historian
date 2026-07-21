@@ -1,0 +1,24 @@
+{
+  "$schema": "./spec/schema/config.schema.json",
+  "history": {
+    "refs": ["HEAD"],
+    "includeMergedCommits": true
+  },
+  "analyzers": {
+    "clojure": {
+      "command": ["bb", "-cp", "analyzers/clojure/src", "-m", "code-historian.analyzer"],
+      "extensions": [".clj", ".cljs", ".cljc", ".bb"]
+    }
+  },
+  "qdrant": {
+    "url": "http://127.0.0.1:6333"
+  },
+  "embedding": {
+    "provider": "openai-compatible",
+    "baseUrl": "${EMBEDDING_BASE_URL}",
+    "apiKeyEnv": "EMBEDDING_API_KEY",
+    "model": "${EMBEDDING_MODEL}",
+    "dimensions": 1536
+  }
+}
+

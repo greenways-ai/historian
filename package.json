@@ -1,0 +1,19 @@
+{
+  "name": "@greenways-ai/code-historian",
+  "version": "0.1.0",
+  "private": false,
+  "type": "module",
+  "bin": {
+    "code-historian": "./src/cli.js"
+  },
+  "scripts": {
+    "doctor": "bun src/cli.js doctor",
+    "test": "bun test",
+    "analyzer:test": "bb -cp analyzers/clojure/src:analyzers/clojure/test analyzers/clojure/test/code_historian/analyzer_test.clj",
+    "check": "bun test && bun run analyzer:test"
+  },
+  "engines": {
+    "bun": ">=1.2.18"
+  }
+}
+

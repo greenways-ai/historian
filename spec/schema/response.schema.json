@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://greenways-ai.github.io/code-historian/schema/response-1.0.json",
+  "title": "Code Historian analyzer response",
+  "type": "object",
+  "required": ["protocol_version", "request_id", "op"],
+  "properties": {
+    "protocol_version": { "const": "1.0" },
+    "request_id": { "type": "string", "minLength": 1 },
+    "op": { "type": "string" },
+    "result": { "type": "object" },
+    "error": {
+      "type": "object",
+      "required": ["code", "message"],
+      "properties": {
+        "code": {
+          "enum": ["invalid_request", "unsupported_operation", "unsupported_language", "too_large", "parse_error", "timeout", "internal_error"]
+        },
+        "message": { "type": "string" },
+        "details": {}
+      },
+      "additionalProperties": false
+    }
+  },
+  "oneOf": [
+    { "required": ["result"], "not": { "required": ["error"] } },
+    { "required": ["error"], "not": { "required": ["result"] } }
+  ],
+  "additionalProperties": false
+}
+

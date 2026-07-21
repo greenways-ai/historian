@@ -1,0 +1,7 @@
+{:deps {rewrite-clj/rewrite-clj {:mvn/version "1.2.55"}}
+ :tasks
+ {analyzer {:doc "Run the Clojure analyzer worker"
+            :task (shell "bb -cp analyzers/clojure/src -m code-historian.analyzer")}
+  analyzer:test {:doc "Test the Clojure analyzer"
+                 :task (shell "bb -cp analyzers/clojure/src:analyzers/clojure/test analyzers/clojure/test/code_historian/analyzer_test.clj")}}}
+

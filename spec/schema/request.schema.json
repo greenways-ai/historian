@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://greenways-ai.github.io/code-historian/schema/request-1.0.json",
+  "title": "Code Historian analyzer request",
+  "type": "object",
+  "required": ["protocol_version", "request_id", "op"],
+  "properties": {
+    "protocol_version": { "const": "1.0" },
+    "request_id": { "type": "string", "minLength": 1, "maxLength": 256 },
+    "op": { "enum": ["describe", "analyze", "ping", "shutdown"] },
+    "language": { "type": "string" },
+    "path": { "type": "string" },
+    "blob_oid": { "type": "string" },
+    "source": { "type": "string" },
+    "config": { "type": "object" }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "op": { "const": "analyze" } } },
+      "then": { "required": ["language", "path", "blob_oid", "source", "config"] }
+    }
+  ],
+  "additionalProperties": true
+}
+

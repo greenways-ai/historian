@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Code Historian configuration",
+  "type": "object",
+  "required": ["history", "analyzers", "qdrant", "embedding"],
+  "properties": {
+    "history": {
+      "type": "object",
+      "required": ["refs"],
+      "properties": {
+        "refs": { "type": "array", "minItems": 1, "items": { "type": "string" } },
+        "includeMergedCommits": { "type": "boolean", "default": true }
+      }
+    },
+    "analyzers": { "type": "object", "minProperties": 1 },
+    "qdrant": {
+      "type": "object",
+      "required": ["url"],
+      "properties": { "url": { "type": "string", "format": "uri" } }
+    },
+    "embedding": {
+      "type": "object",
+      "required": ["provider", "baseUrl", "apiKeyEnv", "model", "dimensions"],
+      "properties": {
+        "provider": { "const": "openai-compatible" },
+        "baseUrl": { "type": "string" },
+        "apiKeyEnv": { "type": "string" },
+        "model": { "type": "string" },
+        "dimensions": { "type": "integer", "minimum": 1 }
+      }
+    }
+  },
+  "additionalProperties": false
+}
+
