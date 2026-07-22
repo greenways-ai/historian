@@ -9,6 +9,10 @@ permissions:
   contents: read
   id-token: write
 
+concurrency:
+  group: npm-publish
+  cancel-in-progress: false
+
 jobs:
   publish:
     runs-on: ubuntu-latest
@@ -17,11 +21,29 @@ jobs:
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: 1.2.18
+      - uses: DeLaGuardo/setup-clojure@13.4
+        with:
+          bb: 1.12.218
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 24
           registry-url: https://registry.npmjs.org
-      - run: bun install --frozen-lockfile
-      - run: npm publish --access public --provenance
+          package-manager-cache: false
+      - name: Install npm trusted-publishing client
+        run: npm install --global npm@latest
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+      - name: Verify release tag
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: test "$RELEASE_TAG" = "v$(node -p "require('./package.json').version")"
+      - name: Run test suite
+        run: bun run check
+      - name: Run analyzer conformance
+        run: |
+          bun run conformance:typescript
+          bun run conformance:python
+      - name: Validate package contents
+        run: npm pack --dry-run
+      - name: Publish to npm with OIDC trusted publishing
+        run: npm publish --access public
