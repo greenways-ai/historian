@@ -42,8 +42,23 @@ bun build --compile src/cli.js --outfile dist/gw-historian
 ```
 
 The npm package includes the CLI source, Babashka analyzers, `bb.edn`, specs,
-and the agent skill. Publishing is configured for the public npm registry and
-is performed by pushing a `v*` tag through GitHub Actions.
+and the agent skill. Publishing uses npm Trusted Publishing through GitHub
+Actions, with OIDC authentication and automatic provenance. Configure the npm
+package's trusted publisher as `greenways-ai/historian` with workflow filename
+`publish.yml`, then publish a version by pushing a matching `v*` tag. The
+package must already exist on npm before its Trusted Publisher can be configured;
+bootstrap the first release manually if necessary, then use the workflow for
+subsequent releases:
+
+```bash
+npm version patch
+git push origin main --follow-tags
+```
+
+The workflow verifies that the tag matches `package.json`, runs the complete
+project test suite and TypeScript/Python analyzer conformance, validates the
+package contents, and publishes to the public npm registry. No long-lived
+`NPM_TOKEN` is required.
 
 ## Quick start
 
@@ -77,7 +92,84 @@ protocol and conformance workflow.
 
 ## Multiple repositories
 
-Keep one database per repository, preferably outside the checkout:
+The basic operating model is one Git checkout and one Historian SQLite database
+per repository. Historian analyzes Python, JavaScript/TypeScript, and Clojure
+files automatically based on their extensions.
+
+Use complete clones; shallow clones are rejected because Historian needs the
+repository ancestry:
+
+```bash
+git clone https://github.com/psf/requests.git ~/src/requests
+```
+
+Create a dedicated index directory for each repository. The CLI reads its
+configuration from the current directory and stores the default database there:
+
+```bash
+mkdir -p ~/.local/share/greenways-historian/requests
+cd ~/.local/share/greenways-historian/requests
+cp /path/to/historian/greenways-historian.example.json greenways-historian.json
+```
+
+When the index directory is separate from the Historian checkout, use absolute
+paths for analyzer commands in `greenways-historian.json`:
+
+```json
+{
+  "analyzers": {
+    "python": {
+      "command": ["python3", "/path/to/historian/analyzers/python/src/analyzer.py"],
+      "extensions": [".py", ".pyi", ".pyw"]
+    }
+  }
+}
+```
+
+Keep the JavaScript/TypeScript and Clojure entries too when the repository uses
+those languages. Then initialize and index the repository:
+
+```bash
+gw-historian doctor
+gw-historian init
+gw-historian index ~/src/requests
+```
+
+Query it from the same index directory:
+
+```bash
+gw-historian search "session adapter"
+gw-historian similar "Session"
+gw-historian history "sessions/Session"
+gw-historian changes "authentication"
+gw-historian retrieve "how sessions are configured"
+gw-historian trace "Session" --max-depth 8 --max-paths 32
+```
+
+Python symbols currently use the source file's module basename, so a symbol
+may appear as `sessions/Session` rather than a full package import path.
+
+After new commits, update the same index:
+
+```bash
+cd ~/.local/share/greenways-historian/requests
+gw-historian update ~/src/requests
+```
+
+Only newly reachable commits and changed blobs are processed. Add another
+repository by giving it a separate index directory and database:
+
+```bash
+mkdir -p ~/.local/share/greenways-historian/flask
+cd ~/.local/share/greenways-historian/flask
+cp /path/to/historian/greenways-historian.example.json greenways-historian.json
+gw-historian init
+gw-historian index ~/src/flask
+```
+
+Do not combine unrelated repositories into one Historian database.
+
+The resulting layout can look like this:
 
 ```text
 ~/.local/share/greenways-historian/repos/
