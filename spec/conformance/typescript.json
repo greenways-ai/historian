@@ -1,0 +1,7 @@
+{
+  "name": "typescript-basic",
+  "language": "typescript",
+  "path": "fixtures/example.ts",
+  "source": "import { inc } from './math.js';\nexport interface User { id: string; }\nexport const greet = (user: User): string => inc(user.id.length).toString();\n",
+  "expected": { "symbol_names": ["example/greet", "example/User"], "reference_targets": ["./math.js", "inc", "User"] }
+}

@@ -27,7 +27,7 @@ describe("index integration", () => {
       const result = await indexRepository({
         repository: root,
         databasePath,
-        analyzers: { clojure: { command: ["bb", "-cp", resolve("analyzers/clojure/src"), "-m", "code-historian.analyzer"] } }
+        analyzers: { clojure: { command: ["bb", "-cp", resolve("analyzers/clojure/src"), "-m", "greenways-historian.analyzer"] } }
       });
       expect(result.commits).toBe(2);
       const db = await openDatabase(databasePath);

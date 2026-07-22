@@ -72,7 +72,7 @@ async function doctor() {
 }
 
 function usage() {
-  console.log(`greenways-historian ${VERSION}\n\nUsage:\n  greenways-historian doctor\n  greenways-historian analyzer check <command...>\n  greenways-historian --version\n`);
+  console.log(`gw-historian ${VERSION}\n\nUsage:\n  gw-historian doctor\n  gw-historian analyzer check <command...>\n  greenways-historian --version\n`);
 }
 
 const { positionals, values } = parseArgs({

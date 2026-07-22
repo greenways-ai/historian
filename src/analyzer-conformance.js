@@ -58,9 +58,9 @@ function validateEnvelope(response, requestId, op) {
   assert(("result" in response) !== ("error" in response), "response must contain exactly one body");
 }
 
-async function run(command) {
+async function run(command, fixturePath = "spec/conformance/clojure.json") {
   const analyzer = await start(command);
-  const fixture = await Bun.file("spec/conformance/clojure.json").json();
+  const fixture = await Bun.file(fixturePath).json();
   const checks = [];
   const check = async (name, fn) => {
     try { checks.push(result(true, name, await fn())); }
@@ -122,8 +122,11 @@ async function run(command) {
 }
 
 export async function runAnalyzerConformance(command) {
-  const output = { command, checks: [] };
-  try { output.checks = await run(command); }
+  const fixtureFlag = command.indexOf("--fixture");
+  const fixturePath = fixtureFlag >= 0 ? command[fixtureFlag + 1] : "spec/conformance/clojure.json";
+  const analyzerCommand = fixtureFlag >= 0 ? [...command.slice(0, fixtureFlag), ...command.slice(fixtureFlag + 2)] : command;
+  const output = { command: analyzerCommand, fixture: fixturePath, checks: [] };
+  try { output.checks = await run(analyzerCommand, fixturePath); }
   catch (error) { output.checks = [result(false, "startup", { error: error.message })]; }
   output.ok = output.checks.every((check) => check.ok);
   console.log(JSON.stringify(output, null, 2));

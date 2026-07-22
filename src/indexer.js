@@ -35,8 +35,17 @@ export async function indexRepository({ repository = ".", refs = ["HEAD"], datab
         for (const change of changes) {
           if (!change.newBlobOid || change.newBlobOid === "0000000000000000000000000000000000000000" || change.newMode === "160000") continue;
           const source = new TextDecoder().decode((await objects.read(change.newBlobOid)).bytes);
-          const extension = `.${change.path.split(".").at(-1)}`;
-          const language = extension === ".cljs" ? "clojurescript" : [".clj", ".cljc", ".bb"].includes(extension) ? "clojure" : null;
+          const lowerPath = change.path.toLowerCase();
+          const extension = `.${lowerPath.split(".").at(-1)}`;
+          const language = lowerPath.endsWith(".d.ts") || [".ts", ".tsx"].includes(extension)
+            ? "typescript"
+            : [".js", ".jsx", ".mjs", ".cjs"].includes(extension)
+              ? "javascript"
+              : extension === ".cljs"
+                ? "clojurescript"
+                : [".clj", ".cljc", ".bb"].includes(extension)
+                  ? "clojure"
+                  : null;
           if (!language) continue;
           analysisJobs.push({ path: change.newPath ?? change.path, language, blobOid: change.newBlobOid, source });
         }

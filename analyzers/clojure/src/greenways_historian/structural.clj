@@ -1,4 +1,4 @@
-(ns code-historian.structural
+(ns greenways-historian.structural
   (:require [clojure.string :as str]
             [rewrite-clj.node :as node]
             [rewrite-clj.parser :as parser])

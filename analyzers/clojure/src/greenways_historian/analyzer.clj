@@ -1,7 +1,7 @@
-(ns code-historian.analyzer
+(ns greenways-historian.analyzer
   (:require [cheshire.core :as json]
             [clojure.string :as str]
-            [code-historian.structural :as structural]
+            [greenways-historian.structural :as structural]
             [rewrite-clj.node :as node]
             [rewrite-clj.parser :as parser])
   (:import [java.nio.charset StandardCharsets]
@@ -156,7 +156,7 @@
      :diagnostics []}))
 
 (defn describe-result []
-  {:name "code-historian-clojure"
+  {:name "greenways-historian-clojure"
    :version analyzer-version
    :protocol_versions [protocol-version]
    :languages ["clojure" "clojurescript"]

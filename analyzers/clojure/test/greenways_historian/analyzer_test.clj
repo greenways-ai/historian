@@ -1,11 +1,11 @@
 (require '[clojure.test :refer [deftest is run-tests]])
-(require '[code-historian.analyzer :as analyzer])
+(require '[greenways-historian.analyzer :as analyzer])
 
 (deftest describes-protocol
   (let [response (analyzer/handle-request
                   {:protocol_version "1.0", :request_id "d1", :op "describe"})]
     (is (= "d1" (:request_id response)))
-    (is (= "code-historian-clojure" (get-in response [:result :name])))))
+    (is (= "greenways-historian-clojure" (get-in response [:result :name])))))
 
 (deftest extracts-clojure-symbols-and-calls
   (let [source "(ns example.core)\n\n(defn answer [x]\n  (inc x))\n"

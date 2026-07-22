@@ -1,6 +1,6 @@
-(ns code-historian.kondo-analyzer-test
+(ns greenways-historian.kondo-analyzer-test
   (:require [clojure.test :refer [deftest is run-tests]]
-            [code-historian.kondo-analyzer :as analyzer]))
+            [greenways-historian.kondo-analyzer :as analyzer]))
 
 (def source
   "(ns sample.core\n  (:require [clojure.set :as set]))\n\n(defprotocol Greeter\n  (greet [this]))\n\n(defrecord Person [name]\n  Greeter\n  (greet [this] name))\n\n(defn add [x]\n  (+ x 1))\n\n(defn use-it [x]\n  (set/union #{x} #{1}))\n")
@@ -28,6 +28,6 @@
     (is (some #(= "clojure.set/union" (:target_qualified_name %)) references))))
 
 (defn -main [& _]
-  (let [{:keys [fail error]} (run-tests 'code-historian.kondo-analyzer-test)]
+  (let [{:keys [fail error]} (run-tests 'greenways-historian.kondo-analyzer-test)]
     (when (pos? (+ fail error))
       (System/exit 1))))

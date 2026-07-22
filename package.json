@@ -1,10 +1,10 @@
 {
-  "name": "@greenways-ai/greenways-historian",
+  "name": "@greenways-ai/historian",
   "version": "0.1.0",
   "private": false,
   "type": "module",
   "bin": {
-    "greenways-historian": "./src/cli.js"
+    "gw-historian": "./src/cli.js"
   },
   "files": [
     "src",
@@ -29,10 +29,11 @@
   },
   "scripts": {
     "doctor": "bun src/cli.js doctor",
-    "build:binary": "bun build --compile src/cli.js --outfile dist/greenways-historian",
+    "build:binary": "bun build --compile src/cli.js --outfile dist/gw-historian",
     "test": "bun test",
-    "analyzer:test": "bb -cp analyzers/clojure/src:analyzers/clojure/test analyzers/clojure/test/code_historian/analyzer_test.clj",
-    "conformance": "bun src/cli.js analyzer check bb -cp analyzers/clojure/src -m code-historian.analyzer",
+    "analyzer:test": "bb -cp analyzers/clojure/src:analyzers/clojure/test analyzers/clojure/test/greenways_historian/analyzer_test.clj",
+    "conformance": "bun src/cli.js analyzer check bb -cp analyzers/clojure/src -m greenways-historian.analyzer",
+    "conformance:typescript": "bun src/cli.js analyzer check bun analyzers/typescript/src/analyzer.js --fixture spec/conformance/typescript.json",
     "benchmark": "bun benchmarks/index.js",
     "fixture:large": "bun benchmarks/generate-history-fast.js",
     "check": "bun test && bun run analyzer:test && bb run analyzer:kondo:test",
@@ -40,6 +41,9 @@
   },
   "engines": {
     "bun": ">=1.2.18"
+  },
+  "dependencies": {
+    "typescript": "^5.9.3"
   },
   "devDependencies": {
     "ajv": "^8.20.0"

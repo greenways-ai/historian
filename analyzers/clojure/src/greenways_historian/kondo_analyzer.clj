@@ -1,7 +1,7 @@
-(ns code-historian.kondo-analyzer
+(ns greenways-historian.kondo-analyzer
   (:require [babashka.pods :as pods]
             [cheshire.core :as json]
-            [code-historian.structural :as structural]
+            [greenways-historian.structural :as structural]
             [clojure.string :as str])
   (:import [java.nio.charset StandardCharsets]
            [java.nio.file Files]
@@ -161,7 +161,7 @@
       ".clj"))
 
 (defn run-analysis [source path blob-oid language]
-  (let [file (Files/createTempFile "code-historian-kondo-" (temp-suffix path) (make-array java.nio.file.attribute.FileAttribute 0))
+  (let [file (Files/createTempFile "greenways-historian-kondo-" (temp-suffix path) (make-array java.nio.file.attribute.FileAttribute 0))
         temp-path (.toString file)]
     (try
       (spit temp-path source)
@@ -219,7 +219,7 @@
     (when-not (= protocol-version (:protocol_version request))
       (throw (ex-info "unsupported protocol version" {:code "invalid_request"})))
     (case (:op request)
-      "describe" (response request :result {:name "code-historian-clojure-kondo"
+      "describe" (response request :result {:name "greenways-historian-clojure-kondo"
                                              :version analyzer-version
                                              :protocol_versions [protocol-version]
                                              :languages ["clojure" "clojurescript"]

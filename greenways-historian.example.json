@@ -6,8 +6,16 @@
   },
   "analyzers": {
     "clojure": {
-      "command": ["bb", "-cp", "analyzers/clojure/src", "-m", "code-historian.analyzer"],
+      "command": ["bb", "-cp", "analyzers/clojure/src", "-m", "greenways-historian.analyzer"],
       "extensions": [".clj", ".cljs", ".cljc", ".bb"]
+    },
+    "javascript": {
+      "command": ["bun", "analyzers/typescript/src/analyzer.js"],
+      "extensions": [".js", ".jsx", ".mjs", ".cjs"]
+    },
+    "typescript": {
+      "command": ["bun", "analyzers/typescript/src/analyzer.js"],
+      "extensions": [".ts", ".tsx", ".d.ts"]
     }
   },
   "qdrant": {

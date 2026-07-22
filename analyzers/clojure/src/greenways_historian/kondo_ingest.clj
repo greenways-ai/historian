@@ -1,8 +1,8 @@
-(ns code-historian.kondo-ingest
+(ns greenways-historian.kondo-ingest
   (:require [cheshire.core :as json]
             [clojure.java.io :as io]
             [clojure.string :as str]
-            [code-historian.kondo-analyzer :as analyzer]))
+            [greenways-historian.kondo-analyzer :as analyzer]))
 
 (def supported-extensions #{".clj" ".cljs" ".cljc" ".bb"})
 

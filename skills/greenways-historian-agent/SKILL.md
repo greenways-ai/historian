@@ -15,15 +15,15 @@ commit and revision provenance.
 1. From the repository root, check the local environment:
 
 ```bash
-greenways-historian doctor
+gw-historian doctor
 ```
 
 2. Initialize or update the repository index:
 
 ```bash
-greenways-historian init
-greenways-historian index .
-greenways-historian update .
+gw-historian init
+gw-historian index .
+gw-historian update .
 ```
 
 3. Select the narrowest query:
@@ -32,7 +32,7 @@ greenways-historian update .
 greenways-historian retrieve "query terms"
 greenways-historian similar "namespace/qualified-name"
 greenways-historian changes "commit or path terms"
-greenways-historian history "namespace/qualified-name"
+gw-historian history "namespace/qualified-name"
 greenways-historian trace "revision-id"
 ```
 
@@ -61,7 +61,7 @@ greenways-historian ingest /tmp/analysis.jsonl /path/to/repository
 - Treat similarity as a ranking signal, not proof of equivalence.
 - Explain when an unchanged structural revision appears across many commits.
 - Report missing or failed analysis instead of fabricating symbols.
-- Refresh with `greenways-historian update .` when the repository advances.
+- Refresh with `gw-historian update .` when the repository advances.
 
 ## Multiple repositories
 
@@ -74,3 +74,9 @@ cross-repository comparison.
 Do not introduce MCP, an LLM, Ollama, Qdrant, or an embedding provider for the
 core workflow. SQLite, Git, Bun, Babashka, and the configured analyzers are
 authoritative for this skill.
+
+## JavaScript and TypeScript workflow
+
+Configure `javascript` and `typescript` to use `bun analyzers/typescript/src/analyzer.js`. The worker supports `.js`, `.jsx`, `.mjs`, `.cjs`, `.ts`, `.tsx`, and `.d.ts` and emits normalized declaration shapes, structural hashes, imports, calls, type references, and diagnostics through the existing JSONL protocol.
+
+Treat the initial results as blob-local historical facts. Do not infer successful project-wide module or type resolution from an import reference until project-aware indexing is added.

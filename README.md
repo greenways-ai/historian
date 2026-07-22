@@ -24,20 +24,20 @@ The npm package is a Bun package. npm is the distribution channel, but the CLI
 still runs on Bun because it uses `bun:sqlite`.
 
 ```bash
-npm install -g @greenways-ai/greenways-historian
-greenways-historian doctor
+npm install -g @greenways-ai/historian
+gw-historian doctor
 ```
 
 Or run it without a global install:
 
 ```bash
-bunx @greenways-ai/greenways-historian doctor
+bunx @greenways-ai/historian doctor
 ```
 
 For a self-contained executable, build a platform-specific Bun binary:
 
 ```bash
-bun build --compile src/cli.js --outfile dist/greenways-historian
+bun build --compile src/cli.js --outfile dist/gw-historian
 ```
 
 The npm package includes the CLI source, Babashka analyzers, `bb.edn`, specs,
@@ -48,10 +48,10 @@ is performed by pushing a `v*` tag through GitHub Actions.
 
 ```bash
 cp greenways-historian.example.json greenways-historian.json
-greenways-historian doctor
-greenways-historian init
-greenways-historian index /path/to/repository
-greenways-historian update /path/to/repository
+gw-historian doctor
+gw-historian init
+gw-historian index /path/to/repository
+gw-historian update /path/to/repository
 ```
 
 Query the indexed history:
@@ -61,7 +61,7 @@ greenways-historian search "qualified symbol"
 greenways-historian retrieve "historical context"
 greenways-historian similar "example.core/answer"
 greenways-historian changes "parser rename"
-greenways-historian history "example.core/answer"
+gw-historian history "example.core/answer"
 greenways-historian trace "revision-id"
 ```
 
@@ -126,10 +126,16 @@ bun run fixture:large /tmp/greenways-historian-large-fixture 250
 bun run fixture:validate /tmp/greenways-historian-large-fixture /tmp/greenways-historian-large.sqlite 250
 ```
 
-The internal `code_historian.*` Babashka namespaces are retained as analyzer
+The internal `greenways_historian.*` Babashka namespaces are retained as analyzer
 protocol identifiers for compatibility. They are not the public package or
 CLI name.
 
 ## License
 
 Apache-2.0
+
+## JavaScript and TypeScript analysis
+
+Historian can analyze JavaScript and TypeScript blobs with the bundled Bun worker. It supports `.js`, `.jsx`, `.mjs`, `.cjs`, `.ts`, `.tsx`, and `.d.ts` files and emits the same symbol, reference, diagnostic, and structural-feature protocol used by the Clojure analyzer.
+
+The first implementation is intentionally blob-local: it extracts declarations, imports, calls, type references, inheritance, and normalized AST shape without requiring a project build or an LLM. Project-wide module and type resolution can be layered on later without changing the historical storage contract.

@@ -1,14 +1,14 @@
 {:deps {rewrite-clj/rewrite-clj {:mvn/version "1.2.55"}}
  :tasks
  {analyzer {:doc "Run the Clojure analyzer worker"
-            :task (shell "bb -cp analyzers/clojure/src -m code-historian.analyzer")}
+            :task (shell "bb -cp analyzers/clojure/src -m greenways-historian.analyzer")}
   analyzer:kondo {:doc "Run the clj-kondo-backed Clojure analyzer worker"
-                  :task (shell "bb -cp analyzers/clojure/src -m code-historian.kondo-analyzer")}
+                  :task (shell "bb -cp analyzers/clojure/src -m greenways-historian.kondo-analyzer")}
   analyzer:kondo:test {:doc "Run clj-kondo analyzer normalization tests"
-                       :task (shell "bb -cp analyzers/clojure/src:analyzers/clojure/test -m code-historian.kondo-analyzer-test")}
+                       :task (shell "bb -cp analyzers/clojure/src:analyzers/clojure/test -m greenways-historian.kondo-analyzer-test")}
   ingest:kondo {:doc "Ingest a Clojure source tree through clj-kondo"
-                :task (shell "bb -cp analyzers/clojure/src -m code-historian.kondo-ingest")}
+                :task (shell "bb -cp analyzers/clojure/src -m greenways-historian.kondo-ingest")}
   ingest {:doc "Ingest ../foundation-base/src through clj-kondo"
-          :task (shell "bb -cp analyzers/clojure/src -m code-historian.kondo-ingest")}
+          :task (shell "bb -cp analyzers/clojure/src -m greenways-historian.kondo-ingest")}
   analyzer:test {:doc "Test the Clojure analyzer"
-                 :task (shell "bb -cp analyzers/clojure/src:analyzers/clojure/test analyzers/clojure/test/code_historian/analyzer_test.clj")}}}
+                 :task (shell "bb -cp analyzers/clojure/src:analyzers/clojure/test analyzers/clojure/test/greenways_historian/analyzer_test.clj")}}}
