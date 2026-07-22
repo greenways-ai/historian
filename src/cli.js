@@ -109,6 +109,7 @@ if (values.version) {
     repository: positionals[1] ?? ".",
     databasePath: positionals[2] ?? ".code-historian/index.sqlite",
     analyzers: configuration.analyzers ?? {},
+    fallbackAnalyzers: configuration.fallbackAnalyzers ?? {},
     analyzerConfig: configuration.analyzerConfig ?? {},
     analyzerConcurrency: configuration.analyzerConcurrency ?? 2
   })));
