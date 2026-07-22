@@ -14,6 +14,7 @@ import { inspectRecovery } from "./recovery.js";
 import { resolveHistory } from "./history.js";
 import { traceGraph } from "./trace.js";
 import { retrieveContext } from "./retrieval.js";
+import { repairAnalysisGaps } from "./repair.js";
 
 const VERSION = "0.1.0";
 
@@ -101,6 +102,15 @@ if (values.version) {
     refs: ["HEAD"],
     analyzers: configuration.analyzers ?? {},
     analyzerConfig: configuration.analyzerConfig ?? {}
+  })));
+} else if (positionals[0] === "repair") {
+  const configuration = await loadConfiguration();
+  console.log(JSON.stringify(await repairAnalysisGaps({
+    repository: positionals[1] ?? ".",
+    databasePath: positionals[2] ?? ".code-historian/index.sqlite",
+    analyzers: configuration.analyzers ?? {},
+    analyzerConfig: configuration.analyzerConfig ?? {},
+    analyzerConcurrency: configuration.analyzerConcurrency ?? 2
   })));
 } else if (positionals[0] === "gc") {
   console.log(JSON.stringify(await gcDatabase()));

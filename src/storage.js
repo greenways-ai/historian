@@ -154,6 +154,20 @@ const MIGRATIONS = [
     feature_json TEXT NOT NULL
   );
   CREATE INDEX revision_structures_shape ON revision_structures(shape_hash);
+  `,
+  `
+  CREATE TABLE analysis_errors (
+    id INTEGER PRIMARY KEY,
+    repository_id INTEGER NOT NULL REFERENCES repositories(id) ON DELETE CASCADE,
+    commit_oid TEXT NOT NULL,
+    path TEXT NOT NULL,
+    blob_oid TEXT NOT NULL,
+    language TEXT,
+    error_json TEXT NOT NULL,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE (repository_id, commit_oid, path, blob_oid)
+  );
+  CREATE INDEX analysis_errors_blob ON analysis_errors(repository_id, blob_oid);
   `
 ];
 

@@ -14,10 +14,10 @@ describe("SQLite persistence", () => {
     const temporary = await temporaryDatabase("migrations");
     const first = await openDatabase(temporary.path);
     expect(first.query("SELECT journal_mode FROM pragma_journal_mode").get().journal_mode).toBe("wal");
-    expect(first.query("SELECT MAX(version) AS version FROM schema_migrations").get().version).toBe(2);
+    expect(first.query("SELECT MAX(version) AS version FROM schema_migrations").get().version).toBe(3);
     first.close();
     const second = await openDatabase(temporary.path);
-    expect(second.query("SELECT COUNT(*) AS count FROM schema_migrations").get().count).toBe(2);
+    expect(second.query("SELECT COUNT(*) AS count FROM schema_migrations").get().count).toBe(3);
     expect(second.query("SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'index_checkpoints'").get().name).toBe("index_checkpoints");
     second.close();
     await rm(temporary.directory, { recursive: true, force: true });

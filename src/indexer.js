@@ -43,13 +43,17 @@ export async function indexRepository({ repository = ".", refs = ["HEAD"], datab
       }
       const responses = await Promise.all(analysisJobs.map(async (job) => ({
         path: job.path,
+        blobOid: job.blobOid,
+        language: job.language,
         response: await pool.analyze({ language: job.language, path: job.path, blob_oid: job.blobOid, source: job.source })
       })));
+      const analysisFailures = [];
       const analyses = responses.flatMap((item) => {
         if (item.response.result?.file && Array.isArray(item.response.result.symbols) && Array.isArray(item.response.result.references)) {
           return [{ path: item.path, analysis: item.response.result }];
         }
         analysisErrors += 1;
+        analysisFailures.push({ path: item.path, blobOid: item.blobOid, language: item.language, error: item.response.error ?? item.response });
         return [];
       });
       writeCheckpoint(db, {
@@ -73,6 +77,11 @@ export async function indexRepository({ repository = ".", refs = ["HEAD"], datab
           }
           for (const item of analyses) {
             persist({ repositoryId, commitOid: commit.oid, path: item.path, analysis: item.analysis, analyzerFingerprint: "configured" });
+          }
+          for (const failure of analysisFailures) {
+            db.query(`INSERT OR REPLACE INTO analysis_errors(repository_id, commit_oid, path, blob_oid, language, error_json)
+                      VALUES (?, ?, ?, ?, ?, ?)`)
+              .run(repositoryId, commit.oid, failure.path, failure.blobOid, failure.language, JSON.stringify(failure.error));
           }
           const changed = changesByParent.flatMap(({ changes }) => changes.map((change) => `${change.status} ${change.oldPath ?? change.path} ${change.newPath ?? change.path}`));
           writeCommitDocument({
