@@ -1,4 +1,4 @@
-# Greenways Historian
+# Historian
 
 Git-native temporal code indexing, history, lineage, and structural similarity.
 
