@@ -16,10 +16,12 @@
   },
   "allOf": [
     {
-      "if": { "properties": { "op": { "const": "analyze" } } },
-      "then": { "required": ["language", "path", "blob_oid", "source", "config"] }
+      "if": { "required": ["op"], "properties": { "op": { "const": "analyze" } } },
+      "then": {
+        "required": ["language", "path", "blob_oid", "source", "config"],
+        "properties": { "language": {}, "path": {}, "blob_oid": {}, "source": {}, "config": {} }
+      }
     }
   ],
   "additionalProperties": true
 }
-

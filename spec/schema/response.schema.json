@@ -7,25 +7,42 @@
   "properties": {
     "protocol_version": { "const": "1.0" },
     "request_id": { "type": "string", "minLength": 1 },
-    "op": { "type": "string" },
+    "op": { "enum": ["describe", "analyze", "ping", "shutdown"] },
     "result": { "type": "object" },
     "error": {
       "type": "object",
       "required": ["code", "message"],
       "properties": {
-        "code": {
-          "enum": ["invalid_request", "unsupported_operation", "unsupported_language", "too_large", "parse_error", "timeout", "internal_error"]
-        },
+        "code": { "enum": ["invalid_request", "unsupported_operation", "unsupported_language", "too_large", "parse_error", "timeout", "internal_error"] },
         "message": { "type": "string" },
         "details": {}
       },
       "additionalProperties": false
     }
   },
-  "oneOf": [
-    { "required": ["result"], "not": { "required": ["error"] } },
-    { "required": ["error"], "not": { "required": ["result"] } }
+  "allOf": [
+    {
+      "if": { "required": ["op"], "properties": { "op": { "const": "describe" } } },
+      "then": { "properties": { "result": { "$ref": "https://greenways-ai.github.io/code-historian/schema/result-1.0.json#/$defs/DescribeResult" } } }
+    },
+    {
+      "if": { "required": ["op"], "properties": { "op": { "const": "analyze" } } },
+      "then": { "properties": { "result": { "$ref": "https://greenways-ai.github.io/code-historian/schema/result-1.0.json#/$defs/AnalyzeResult" } } }
+    },
+    {
+      "if": { "required": ["op"], "properties": { "op": { "const": "ping" } } },
+      "then": { "properties": { "result": { "$ref": "https://greenways-ai.github.io/code-historian/schema/result-1.0.json#/$defs/PingResult" } } }
+    },
+    {
+      "if": { "required": ["op"], "properties": { "op": { "const": "shutdown" } } },
+      "then": { "properties": { "result": { "$ref": "https://greenways-ai.github.io/code-historian/schema/result-1.0.json#/$defs/ShutdownResult" } } }
+    },
+    {
+      "oneOf": [
+        { "required": ["result"], "not": { "required": ["error"], "properties": { "error": {} } } },
+        { "required": ["error"], "not": { "required": ["result"], "properties": { "result": {} } } }
+      ]
+    }
   ],
   "additionalProperties": false
 }
-

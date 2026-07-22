@@ -10,10 +10,16 @@
     "doctor": "bun src/cli.js doctor",
     "test": "bun test",
     "analyzer:test": "bb -cp analyzers/clojure/src:analyzers/clojure/test analyzers/clojure/test/code_historian/analyzer_test.clj",
-    "check": "bun test && bun run analyzer:test"
+    "conformance": "bun src/cli.js analyzer check bb -cp analyzers/clojure/src -m code-historian.analyzer",
+    "benchmark": "bun benchmarks/index.js",
+    "fixture:large": "bun benchmarks/generate-history-fast.js",
+    "check": "bun test && bun run analyzer:test && bb run analyzer:kondo:test",
+    "fixture:validate": "bun scripts/validate-fixture.js"
   },
   "engines": {
     "bun": ">=1.2.18"
+  },
+  "devDependencies": {
+    "ajv": "^8.20.0"
   }
 }
-

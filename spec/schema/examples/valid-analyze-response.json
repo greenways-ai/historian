@@ -1,0 +1,1 @@
+{"protocol_version":"1.0","request_id":"analyze-1","op":"analyze","result":{"file":{"language":"clojure","path":"src/example/core.clj","blob_oid":"fixture","namespace":"example.core","imports":[],"source_bytes":37},"symbols":[],"references":[],"diagnostics":[]}}

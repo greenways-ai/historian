@@ -1,6 +1,7 @@
 (ns code-historian.analyzer
   (:require [cheshire.core :as json]
             [clojure.string :as str]
+            [code-historian.structural :as structural]
             [rewrite-clj.node :as node]
             [rewrite-clj.parser :as parser])
   (:import [java.nio.charset StandardCharsets]
@@ -63,6 +64,19 @@
             (when (= "ns" (token-text head)) (token-text name))))
         forms))
 
+(defn ns-imports [forms]
+  (some (fn [form]
+          (let [children (meaningful-children form)]
+            (when (= "ns" (token-text (first children)))
+              (->> (rest children)
+                   (filter #(= :list (node/tag %)))
+                   (filter #(contains? #{"require" ":require"}
+                                      (token-text (first (meaningful-children %)))))
+                   (mapcat #(map token-text (rest (meaningful-children %))))
+                   (remove nil?)
+                   vec))))
+        forms))
+
 (defn signature [children]
   (some #(when (= :vector (node/tag %)) (node/string %)) children))
 
@@ -78,19 +92,22 @@
         name (token-text (second children))
         kind (get definition-kinds head)
         snippet (node/string form)
-        {:keys [range next-cursor]} (source-range source snippet cursor)]
+        structural-features (structural/features-for-node form)
+        {:keys [range next-cursor]} (source-range source snippet cursor)
+        name-range (source-range source name cursor)]
     (when (and kind name)
       {:symbol {:local_id (str "symbol-" index)
                 :kind kind
                 :name name
                 :qualified_name (if namespace (str namespace "/" name) name)
                 :range range
-                :selection_range range
+                :selection_range (:range name-range)
                 :signature (signature (drop 2 children))
                 :modifiers (cond-> [] (= head "defn-") (conj "private"))
-                :source_hash (sha256 snippet)
-                :structural_hash (sha256 (normalize-form form))
-                :structure {:head head, :normalized (normalize-form form)}}
+        :source_hash (sha256 snippet)
+        :structural_hash (:shape_hash structural-features)
+        :structural_features structural-features
+        :structure {:head head, :normalized (normalize-form form)}}
        :next-cursor next-cursor})))
 
 (defn descendants [root]
@@ -107,6 +124,8 @@
                            (not (contains? non-call-heads head))
                            (not (str/starts-with? head ":")))]
             {:kind "call"
+             :range {:start_byte 0, :end_byte 0,
+                     :start {:line 1, :column 1}, :end {:line 1, :column 1}}
              :source_symbol_local_id (:local_id symbol)
              :target_text head
              :resolution (if (str/includes? head "/") "candidate" "unresolved")
@@ -131,7 +150,7 @@
                              (cond-> result symbol (conj symbol))))
                     result))]
     {:file {:language language, :path path, :blob_oid blob_oid,
-            :namespace namespace, :imports [], :source_bytes (byte-count source)}
+            :namespace namespace, :imports (or (ns-imports forms) []), :source_bytes (byte-count source)}
      :symbols symbols
      :references (references-for symbols definitions)
      :diagnostics []}))
@@ -142,7 +161,7 @@
    :protocol_versions [protocol-version]
    :languages ["clojure" "clojurescript"]
    :extensions [".clj" ".cljs" ".cljc" ".bb"]
-   :capabilities ["symbols" "calls" "structural_hashes" "partial_parse"]
+   :capabilities ["symbols" "calls" "structural_hashes" "structural_features" "partial_parse"]
    :max_message_bytes max-message-bytes
    :fingerprint (sha256 (str analyzer-version ":rewrite-clj-1.2.55"))})
 
@@ -163,9 +182,13 @@
       "analyze" (response request :result (analyze-source request))
       (throw (ex-info "unsupported operation" {:code "unsupported_operation"})))
     (catch Exception error
-      (response request :error
-                {:code (or (:code (ex-data error)) "internal_error")
-                 :message (.getMessage error)}))))
+      (let [data (ex-data error)
+            code (or (:code data)
+                     (when (instance? clojure.lang.ExceptionInfo error) "parse_error")
+                     "internal_error")]
+        (response request :error
+                  {:code code
+                   :message (.getMessage error)})))))
 
 (defn run-worker []
   (loop []

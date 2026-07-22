@@ -24,6 +24,19 @@
                   {:protocol_version "1.0", :request_id "x", :op "explode"})
                  [:error :code]))))
 
+(deftest extracts-imports-and-name-selection-range
+  (let [source "(ns example.core (:require [foo.bar :as bar]))\n(defn answer [x] (bar/inc x))\n"
+        result (:result (analyzer/handle-request
+                         {:protocol_version "1.0", :request_id "ranges", :op "analyze",
+                          :language "clojure", :path "core.clj", :blob_oid "ranges",
+                          :source source, :config {}}))
+        symbol (first (:symbols result))
+        selection (:selection_range symbol)
+        definition (:range symbol)]
+    (is (some #(= "[foo.bar :as bar]" %) (get-in result [:file :imports])))
+    (is (< (:start_byte selection) (:end_byte selection)))
+    (is (< (- (:end_byte selection) (:start_byte selection))
+           (- (:end_byte definition) (:start_byte definition))))))
+
 (let [{:keys [fail error]} (run-tests)]
   (when (pos? (+ fail error)) (System/exit 1)))
-

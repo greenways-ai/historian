@@ -1,0 +1,1 @@
+{"protocol_version":"1.0","request_id":"bad-1","op":"ping","result":{"ok":true},"error":{"code":"internal_error","message":"not valid with result"}}

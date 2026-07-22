@@ -1,0 +1,7 @@
+{
+  "name": "clojure-basic",
+  "language": "clojure",
+  "path": "fixtures/unicode.clj",
+  "source": "(ns example.core)\n(defn привет [x]\n  (inc x))\n",
+  "expected": { "source_bytes": 50, "symbol_names": ["example.core/привет"], "reference_targets": ["inc"] }
+}

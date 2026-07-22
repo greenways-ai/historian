@@ -1,6 +1,6 @@
 # Code Historian Analyzer Protocol 1.0
 
-Status: Draft normative specification
+Status: Normative specification
 
 ## Purpose
 
@@ -147,3 +147,12 @@ not claim `resolved` when runtime dispatch is required.
 - The conformance suite is authoritative for framing and schema behavior; the
   prose specification is authoritative for semantics.
 
+
+## Schema and compatibility
+
+The canonical schemas are spec/schema/request.schema.json,
+spec/schema/response.schema.json, and spec/schema/result.schema.json.
+Examples in spec/schema/examples are compatibility fixtures. Minor releases may
+add optional fields and enum values; consumers must ignore unknown fields.
+Minor releases must not remove or change existing field semantics. Major
+releases may change required fields or semantics and use a new protocol version.
