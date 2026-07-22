@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://greenways-ai.github.io/code-historian/schema/response-1.0.json",
-  "title": "Code Historian analyzer response",
+  "$id": "https://greenways-ai.github.io/historian/schema/response-1.0.json",
+  "title": "Greenways Historian analyzer response",
   "type": "object",
   "required": ["protocol_version", "request_id", "op"],
   "properties": {
@@ -23,19 +23,19 @@
   "allOf": [
     {
       "if": { "required": ["op"], "properties": { "op": { "const": "describe" } } },
-      "then": { "properties": { "result": { "$ref": "https://greenways-ai.github.io/code-historian/schema/result-1.0.json#/$defs/DescribeResult" } } }
+      "then": { "properties": { "result": { "$ref": "https://greenways-ai.github.io/historian/schema/result-1.0.json#/$defs/DescribeResult" } } }
     },
     {
       "if": { "required": ["op"], "properties": { "op": { "const": "analyze" } } },
-      "then": { "properties": { "result": { "$ref": "https://greenways-ai.github.io/code-historian/schema/result-1.0.json#/$defs/AnalyzeResult" } } }
+      "then": { "properties": { "result": { "$ref": "https://greenways-ai.github.io/historian/schema/result-1.0.json#/$defs/AnalyzeResult" } } }
     },
     {
       "if": { "required": ["op"], "properties": { "op": { "const": "ping" } } },
-      "then": { "properties": { "result": { "$ref": "https://greenways-ai.github.io/code-historian/schema/result-1.0.json#/$defs/PingResult" } } }
+      "then": { "properties": { "result": { "$ref": "https://greenways-ai.github.io/historian/schema/result-1.0.json#/$defs/PingResult" } } }
     },
     {
       "if": { "required": ["op"], "properties": { "op": { "const": "shutdown" } } },
-      "then": { "properties": { "result": { "$ref": "https://greenways-ai.github.io/code-historian/schema/result-1.0.json#/$defs/ShutdownResult" } } }
+      "then": { "properties": { "result": { "$ref": "https://greenways-ai.github.io/historian/schema/result-1.0.json#/$defs/ShutdownResult" } } }
     },
     {
       "oneOf": [

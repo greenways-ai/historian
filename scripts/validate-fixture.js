@@ -4,7 +4,7 @@ import { indexRepository } from "../src/indexer.js";
 import { openDatabase } from "../src/storage.js";
 
 const repository = resolve(process.argv[2] ?? "/tmp/code-historian-large-fixture");
-const databasePath = resolve(process.argv[3] ?? `${repository}/.code-historian/index.sqlite`);
+const databasePath = resolve(process.argv[3] ?? `${repository}/.greenways-historian/index.sqlite`);
 const minimumCommits = Number(process.argv[4] ?? 1);
 const analyzer = process.env.CODE_HISTORIAN_ANALYZER ?? "rewrite";
 const analyzerModule = analyzer === "kondo" ? "code-historian.kondo-analyzer" : "code-historian.analyzer";

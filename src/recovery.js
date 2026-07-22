@@ -2,7 +2,7 @@ import { resolve } from "node:path";
 import { access } from "node:fs/promises";
 import { openDatabase } from "./storage.js";
 
-export async function inspectRecovery(repository = ".", databasePath = ".code-historian/index.sqlite") {
+export async function inspectRecovery(repository = ".", databasePath = ".greenways-historian/index.sqlite") {
   const db = await openDatabase(databasePath);
   try {
     const shallow = await access(resolve(repository, ".git", "shallow")).then(() => true).catch(() => false);

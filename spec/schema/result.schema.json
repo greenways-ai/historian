@@ -1,6 +1,6 @@
 {
   "$schema":"https://json-schema.org/draft/2020-12/schema",
-  "$id":"https://greenways-ai.github.io/code-historian/schema/result-1.0.json",
+  "$id":"https://greenways-ai.github.io/historian/schema/result-1.0.json",
   "$defs":{
     "Position":{"type":"object","required":["line","column"],"properties":{"line":{"type":"integer","minimum":1},"column":{"type":"integer","minimum":1}},"additionalProperties":false},
     "Range":{"type":"object","required":["start_byte","end_byte","start","end"],"properties":{"start_byte":{"type":"integer","minimum":0},"end_byte":{"type":"integer","minimum":0},"start":{"$ref":"#/$defs/Position"},"end":{"$ref":"#/$defs/Position"}},"additionalProperties":false},

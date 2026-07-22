@@ -11,7 +11,7 @@ function languageForPath(path) {
   return null;
 }
 
-export async function repairAnalysisGaps({ repository = ".", databasePath = ".code-historian/index.sqlite", analyzers = {}, fallbackAnalyzers = {}, analyzerConfig = {}, analyzerConcurrency = 2 } = {}) {
+export async function repairAnalysisGaps({ repository = ".", databasePath = ".greenways-historian/index.sqlite", analyzers = {}, fallbackAnalyzers = {}, analyzerConfig = {}, analyzerConcurrency = 2 } = {}) {
   const root = resolve(repository);
   const db = await openDatabase(databasePath);
   const repositoryId = db.query("SELECT id FROM repositories WHERE path = ?").get(root)?.id;

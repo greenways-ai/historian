@@ -17,15 +17,16 @@ import { retrieveContext } from "./retrieval.js";
 import { repairAnalysisGaps } from "./repair.js";
 
 const VERSION = "0.1.0";
+const PACKAGE_ROOT = resolve(import.meta.dir, "..");
 
-async function loadConfiguration(path = "code-historian.json") {
+async function loadConfiguration(path = "greenways-historian.json") {
   try { return await Bun.file(path).json(); }
   catch { return {}; }
 }
 
-async function commandVersion(command, args = ["--version"]) {
+async function commandVersion(command, args = ["--version"], options = {}) {
   try {
-    const process = Bun.spawn([command, ...args], { stdout: "pipe", stderr: "pipe" });
+    const process = Bun.spawn([command, ...args], { stdout: "pipe", stderr: "pipe", ...options });
     const output = await new Response(process.stdout).text();
     const error = await new Response(process.stderr).text();
     const exitCode = await process.exited;
@@ -36,10 +37,13 @@ async function commandVersion(command, args = ["--version"]) {
 }
 
 async function doctor() {
-  const stateDir = resolve(".code-historian");
   const checks = await Promise.all([
+    { command: "bun", ok: true, version: Bun.version },
     commandVersion("git"),
     commandVersion("bb"),
+    commandVersion("clj-kondo"),
+    commandVersion("bb", ["-e", "(require '[rewrite-clj.zip]) (println \"rewrite-clj loaded\")"], { cwd: PACKAGE_ROOT })
+      .then((check) => ({ ...check, command: "rewrite-clj", version: check.ok ? "loaded through babashka" : check.version ?? check.error })),
     fetch("http://127.0.0.1:6333/healthz")
       .then((response) => ({ command: "qdrant", ok: response.ok, version: response.statusText }))
       .catch((error) => ({ command: "qdrant", ok: false, error: error.message }))
@@ -51,10 +55,14 @@ async function doctor() {
   db.close();
 
   try {
-    await access(resolve("bb.edn"));
-    checks.push({ command: "project", ok: true, version: stateDir });
+    await Promise.all([
+      access(resolve(PACKAGE_ROOT, "bb.edn")),
+      access(resolve(PACKAGE_ROOT, "analyzers/clojure/src")),
+      access(resolve(PACKAGE_ROOT, "skills/greenways-historian-agent/SKILL.md"))
+    ]);
+    checks.push({ command: "package", ok: true, version: PACKAGE_ROOT });
   } catch {
-    checks.push({ command: "project", ok: false, error: "run from the code-historian checkout" });
+    checks.push({ command: "package", ok: false, error: "greenways-historian package assets are incomplete" });
   }
 
   for (const check of checks) {
@@ -64,7 +72,7 @@ async function doctor() {
 }
 
 function usage() {
-  console.log(`code-historian ${VERSION}\n\nUsage:\n  code-historian doctor\n  code-historian analyzer check <command...>\n  code-historian --version\n`);
+  console.log(`greenways-historian ${VERSION}\n\nUsage:\n  greenways-historian doctor\n  greenways-historian analyzer check <command...>\n  greenways-historian --version\n`);
 }
 
 const { positionals, values } = parseArgs({
@@ -84,14 +92,14 @@ if (values.version) {
 } else if (positionals[0] === "analyzer" && positionals[1] === "check") {
   process.exitCode = await runAnalyzerConformance(process.argv.slice(4));
 } else if (positionals[0] === "init") {
-  const db = await openDatabase(positionals[1] ?? ".code-historian/index.sqlite");
+  const db = await openDatabase(positionals[1] ?? ".greenways-historian/index.sqlite");
   db.close();
-  console.log(JSON.stringify({ ok: true, database: positionals[1] ?? ".code-historian/index.sqlite" }));
+  console.log(JSON.stringify({ ok: true, database: positionals[1] ?? ".greenways-historian/index.sqlite" }));
 } else if (positionals[0] === "ingest") {
   console.log(JSON.stringify(await ingestAnalysisJsonl({
     inputPath: positionals[1],
     repository: positionals[2] ?? ".",
-    databasePath: positionals[3] ?? ".code-historian/index.sqlite"
+    databasePath: positionals[3] ?? ".greenways-historian/index.sqlite"
   })));
 } else if (["index", "update"].includes(positionals[0])) {
   const operation = positionals[0] === "index" ? indexRepository : updateRepository;
@@ -107,7 +115,7 @@ if (values.version) {
   const configuration = await loadConfiguration();
   console.log(JSON.stringify(await repairAnalysisGaps({
     repository: positionals[1] ?? ".",
-    databasePath: positionals[2] ?? ".code-historian/index.sqlite",
+    databasePath: positionals[2] ?? ".greenways-historian/index.sqlite",
     analyzers: configuration.analyzers ?? {},
     fallbackAnalyzers: configuration.fallbackAnalyzers ?? {},
     analyzerConfig: configuration.analyzerConfig ?? {},
@@ -138,11 +146,11 @@ if (values.version) {
   try { console.log(JSON.stringify(retrieveContext(db, positionals.slice(1).join(" ")))); }
   finally { db.close(); }
 } else if (positionals[0] === "materialize" && positionals[1] === "revisions") {
-  const db = await openDatabase(positionals[2] ?? ".code-historian/index.sqlite");
+  const db = await openDatabase(positionals[2] ?? ".greenways-historian/index.sqlite");
   try { console.log(JSON.stringify(materializeRevisionDocuments(db))); }
   finally { db.close(); }
 } else if (positionals[0] === "materialize" && positionals[1] === "commits") {
-  const db = await openDatabase(positionals[2] ?? ".code-historian/index.sqlite");
+  const db = await openDatabase(positionals[2] ?? ".greenways-historian/index.sqlite");
   try { console.log(JSON.stringify(materializeCommitDocuments(db))); }
   finally { db.close(); }
 } else if (positionals[0] === "history") {

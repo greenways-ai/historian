@@ -171,7 +171,7 @@ const MIGRATIONS = [
   `
 ];
 
-export async function openDatabase(databasePath = ".code-historian/index.sqlite") {
+export async function openDatabase(databasePath = ".greenways-historian/index.sqlite") {
   const path = resolve(databasePath);
   await mkdir(dirname(path), { recursive: true });
   const db = new Database(path);

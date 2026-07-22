@@ -18,7 +18,7 @@ function repositoryId(db, path) {
   return db.query("SELECT id FROM repositories WHERE path = ?").get(path).id;
 }
 
-export async function ingestAnalysisJsonl({ inputPath, repository = ".", databasePath = ".code-historian/index.sqlite", ref = "HEAD", commitOid } = {}) {
+export async function ingestAnalysisJsonl({ inputPath, repository = ".", databasePath = ".greenways-historian/index.sqlite", ref = "HEAD", commitOid } = {}) {
   if (!inputPath) throw new Error("inputPath is required");
   const root = resolve(repository);
   const oid = commitOid ?? gitRef(root, ref);

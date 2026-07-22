@@ -5,7 +5,7 @@ import { AnalyzerPool } from "./analyzer-pool.js";
 import { createAnalysisPersister } from "./analysis-persistence.js";
 import { createCommitDocumentWriter } from "./search.js";
 
-export async function indexRepository({ repository = ".", refs = ["HEAD"], databasePath = ".code-historian/index.sqlite", analyzers = {}, analyzerConfig = {}, analyzerConcurrency = 1 } = {}) {
+export async function indexRepository({ repository = ".", refs = ["HEAD"], databasePath = ".greenways-historian/index.sqlite", analyzers = {}, analyzerConfig = {}, analyzerConcurrency = 1 } = {}) {
   const root = resolve(repository);
   const db = await openDatabase(databasePath);
   db.query("INSERT OR IGNORE INTO repositories(path) VALUES (?)").run(root);
@@ -109,7 +109,7 @@ export async function updateRepository(options) {
   return indexRepository(options);
 }
 
-export async function gcDatabase(databasePath = ".code-historian/index.sqlite") {
+export async function gcDatabase(databasePath = ".greenways-historian/index.sqlite") {
   const db = await openDatabase(databasePath);
   try { db.exec("VACUUM"); return { ok: true }; }
   finally { db.close(); }

@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://greenways-ai.github.io/code-historian/schema/request-1.0.json",
-  "title": "Code Historian analyzer request",
+  "$id": "https://greenways-ai.github.io/historian/schema/request-1.0.json",
+  "title": "Greenways Historian analyzer request",
   "type": "object",
   "required": ["protocol_version", "request_id", "op"],
   "properties": {

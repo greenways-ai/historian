@@ -3,7 +3,7 @@
   "configVersion": 1,
   "workspaces": {
     "": {
-      "name": "@greenways-ai/code-historian",
+      "name": "@greenways-ai/greenways-historian",
       "devDependencies": {
         "ajv": "^8.20.0",
       },

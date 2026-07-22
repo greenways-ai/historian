@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "Code Historian configuration",
+  "title": "Greenways Historian configuration",
   "type": "object",
   "required": ["history", "analyzers", "qdrant", "embedding"],
   "properties": {
@@ -32,4 +32,3 @@
   },
   "additionalProperties": false
 }
-

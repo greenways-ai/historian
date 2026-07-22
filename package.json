@@ -1,13 +1,35 @@
 {
-  "name": "@greenways-ai/code-historian",
+  "name": "@greenways-ai/greenways-historian",
   "version": "0.1.0",
   "private": false,
   "type": "module",
   "bin": {
-    "code-historian": "./src/cli.js"
+    "greenways-historian": "./src/cli.js"
+  },
+  "files": [
+    "src",
+    "analyzers",
+    "skills",
+    "spec",
+    "bb.edn",
+    "greenways-historian.example.json",
+    "README.md",
+    "LICENSE"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/greenways-ai/historian.git"
+  },
+  "bugs": {
+    "url": "https://github.com/greenways-ai/historian/issues"
+  },
+  "homepage": "https://github.com/greenways-ai/historian",
+  "publishConfig": {
+    "access": "public"
   },
   "scripts": {
     "doctor": "bun src/cli.js doctor",
+    "build:binary": "bun build --compile src/cli.js --outfile dist/greenways-historian",
     "test": "bun test",
     "analyzer:test": "bb -cp analyzers/clojure/src:analyzers/clojure/test analyzers/clojure/test/code_historian/analyzer_test.clj",
     "conformance": "bun src/cli.js analyzer check bb -cp analyzers/clojure/src -m code-historian.analyzer",
