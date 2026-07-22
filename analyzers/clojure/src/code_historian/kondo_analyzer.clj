@@ -85,8 +85,9 @@
         start (char-offset source (:row data) (:col data))
         end (char-offset source (or (:end-row data) (:row data))
                          (or (:end-col data) (:col data)))
-        structural-features (structural/features-for-text
-                             (subs source start (min (count source) (max start end))))]
+        structural-features (when-not (= "local" (str (:defined-by data)))
+                             (structural/features-for-text
+                              (subs source start (min (count source) (max start end)))))]
     {:local_id (str "kondo-symbol-" (:row data) "-" (:name-col data) "-" name)
      :kind kind
      :name name
