@@ -8,13 +8,14 @@ const databasePath = resolve(process.argv[3] ?? `${repository}/.code-historian/i
 const minimumCommits = Number(process.argv[4] ?? 1);
 const analyzer = process.env.CODE_HISTORIAN_ANALYZER ?? "rewrite";
 const analyzerModule = analyzer === "kondo" ? "code-historian.kondo-analyzer" : "code-historian.analyzer";
+const analyzerConcurrency = Number(process.env.CODE_HISTORIAN_ANALYZER_CONCURRENCY ?? 2);
 
 await access(`${repository}/.git`);
 const result = await indexRepository({
   repository,
   databasePath,
   analyzers: { clojure: { command: ["bb", "-cp", resolve("analyzers/clojure/src"), "-m", analyzerModule] } },
-  analyzerConcurrency: 2
+  analyzerConcurrency
 });
 const db = await openDatabase(databasePath);
 try {
