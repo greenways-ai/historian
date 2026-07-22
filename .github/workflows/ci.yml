@@ -18,6 +18,7 @@ jobs:
       - uses: DeLaGuardo/setup-clojure@13.4
         with:
           bb: 1.12.218
+          clj-kondo: 2026.05.25
       - name: Install dependencies
         run: bun install --frozen-lockfile
       - run: bun run check
