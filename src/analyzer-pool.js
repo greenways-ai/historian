@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import { processTreeMemory } from "./process-memory.js";
 
 const MAX_SOURCE_BYTES = 10 * 1024 * 1024;
 const REQUEST_TIMEOUT_MS = 30_000;
@@ -71,6 +72,7 @@ export class AnalyzerPool {
     this.concurrency = Math.max(1, concurrency);
     this.roundRobin = new Map();
     this.starting = new Map();
+    this.memory = { samples: 0, peakRssKb: 0, peakPids: 0, last: null };
   }
 
   commandFor(language, path) {
@@ -149,6 +151,21 @@ export class AnalyzerPool {
       this.queue.push({ payload, resolve, reject });
       this.drain();
     });
+  }
+
+  observeMemory() {
+    try {
+      const snapshot = processTreeMemory();
+      this.memory.samples += 1;
+      this.memory.last = snapshot;
+      this.memory.peakRssKb = Math.max(this.memory.peakRssKb, snapshot.rssKb);
+      this.memory.peakPids = Math.max(this.memory.peakPids, snapshot.pids.length);
+    } catch {}
+    return this.memory;
+  }
+
+  memoryStats() {
+    return { ...this.memory, last: this.memory.last ? { ...this.memory.last } : null };
   }
 
   async close() {

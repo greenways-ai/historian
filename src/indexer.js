@@ -15,6 +15,7 @@ export async function indexRepository({ repository = ".", refs = ["HEAD"], datab
   const persist = createAnalysisPersister(db);
   const writeCommitDocument = createCommitDocumentWriter(db);
   const pool = new AnalyzerPool({ commands: analyzers, config: analyzerConfig, concurrency: analyzerConcurrency });
+  const memoryMonitor = setInterval(() => pool.observeMemory(), 1000);
   const objects = new GitObjectReader(root);
   let commits = 0;
   let analysisErrors = 0;
@@ -86,11 +87,13 @@ export async function indexRepository({ repository = ".", refs = ["HEAD"], datab
       commits += 1;
     }
   } finally {
+    clearInterval(memoryMonitor);
+    pool.observeMemory();
     await objects.close();
     await pool.close();
     db.close();
   }
-  return { repository: root, refs, commits, analysisErrors };
+  return { repository: root, refs, commits, analysisErrors, memory: pool.memoryStats() };
 }
 
 export async function updateRepository(options) {

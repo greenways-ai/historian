@@ -62,3 +62,5 @@ bun run conformance
 bun run fixture:large /tmp/code-historian-large-fixture 250
 bun run fixture:validate /tmp/code-historian-large-fixture /tmp/code-historian-large.sqlite 250
 ```
+
+Fixture validation reports peak RSS and process count for the complete Bun and Babashka descendant tree.
