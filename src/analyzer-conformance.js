@@ -93,6 +93,12 @@ async function run(command, fixturePath = "spec/conformance/clojure.json") {
     assert(Array.isArray(response.result.symbols) && Array.isArray(response.result.references), "analyze arrays missing");
     assert(response.result.symbols.some((symbol) => fixture.expected.symbol_names.includes(symbol.qualified_name)), "fixture symbol expectation not met");
     assert(response.result.references.some((reference) => fixture.expected.reference_targets.includes(reference.target_text)), "fixture reference expectation not met");
+    if (fixture.expected.utf8_symbol_name) {
+      const symbol = response.result.symbols.find((candidate) => candidate.name === fixture.expected.utf8_symbol_name);
+      const offset = fixture.source.indexOf(fixture.expected.utf8_symbol_name);
+      assert(symbol && offset >= 0, "UTF-8 fixture symbol expectation not met");
+      assert(symbol.selection_range.start_byte === utf8Size(fixture.source.slice(0, offset)), "symbol selection range is not UTF-8 based");
+    }
     firstAnalysis = JSON.stringify(response.result);
   });
   await check("deterministic-output", async () => {

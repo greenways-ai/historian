@@ -7,7 +7,7 @@ const count = Number(process.argv[3] ?? 10_000);
 const decoder = new TextDecoder();
 
 function git(...args) {
-  return execFileSync("git", ["-C", destination, ...args], { encoding: "utf8" }).trim();
+  return execFileSync("git", ["-C", destination, ...args], { encoding: "utf8", stderr: "ignore" }).trim();
 }
 
 async function blob(value) {

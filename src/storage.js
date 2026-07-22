@@ -168,6 +168,34 @@ const MIGRATIONS = [
     UNIQUE (repository_id, commit_oid, path, blob_oid)
   );
   CREATE INDEX analysis_errors_blob ON analysis_errors(repository_id, blob_oid);
+  `,
+  `
+  CREATE TABLE analysis_skips (
+    id INTEGER PRIMARY KEY,
+    repository_id INTEGER NOT NULL REFERENCES repositories(id) ON DELETE CASCADE,
+    commit_oid TEXT NOT NULL,
+    path TEXT NOT NULL,
+    blob_oid TEXT,
+    language TEXT,
+    reason TEXT NOT NULL,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE (repository_id, commit_oid, path, blob_oid, reason)
+  );
+  CREATE INDEX analysis_skips_reason ON analysis_skips(repository_id, reason);
+  `,
+  `
+  CREATE TABLE lineage_candidates (
+    id INTEGER PRIMARY KEY,
+    repository_id INTEGER NOT NULL REFERENCES repositories(id) ON DELETE CASCADE,
+    commit_oid TEXT NOT NULL,
+    from_revision_id TEXT NOT NULL REFERENCES revisions(id) ON DELETE CASCADE,
+    to_revision_id TEXT NOT NULL REFERENCES revisions(id) ON DELETE CASCADE,
+    confidence REAL NOT NULL,
+    evidence_json TEXT NOT NULL,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE (repository_id, commit_oid, from_revision_id, to_revision_id)
+  );
+  CREATE INDEX lineage_candidates_commit ON lineage_candidates(repository_id, commit_oid);
   `
 ];
 

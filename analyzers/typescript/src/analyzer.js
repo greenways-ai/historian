@@ -76,7 +76,7 @@ function declarationInfo(node, parent, sourceFile, moduleName) {
     default: break;
   }
   const name = nameNode?.getText(sourceFile) ?? (kind === "constructor" ? "constructor" : null);
-  if (!kind || !name || !/^[$A-Z_a-z][$\w]*$/u.test(name)) return null;
+  if (!kind || !name || !/^(?:[$_]|\p{ID_Start})[$\p{ID_Continue}]*$/u.test(name)) return null;
   const start = node.getStart(sourceFile);
   const end = node.getEnd();
   const selectionStart = nameNode?.getStart(sourceFile) ?? start;
@@ -235,6 +235,8 @@ for await (const line of input) {
   try { request = JSON.parse(line); }
   catch { request = { request_id: "unknown", op: "unknown", protocol_version: protocolVersion }; }
   process.stdout.write(`${JSON.stringify(handle(request))}\n`);
-  if (request.op === "shutdown") break;
+  if (request.op === "shutdown") {
+    input.close();
+    break;
+  }
 }
-

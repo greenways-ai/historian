@@ -7,7 +7,7 @@ const repository = resolve(process.argv[2] ?? "/tmp/code-historian-large-fixture
 const databasePath = resolve(process.argv[3] ?? `${repository}/.greenways-historian/index.sqlite`);
 const minimumCommits = Number(process.argv[4] ?? 1);
 const analyzer = process.env.CODE_HISTORIAN_ANALYZER ?? "rewrite";
-const analyzerModule = analyzer === "kondo" ? "code-historian.kondo-analyzer" : "code-historian.analyzer";
+const analyzerModule = analyzer === "kondo" ? "greenways-historian.kondo-analyzer" : "greenways-historian.analyzer";
 const analyzerConcurrency = Number(process.env.CODE_HISTORIAN_ANALYZER_CONCURRENCY ?? 2);
 
 await access(`${repository}/.git`);

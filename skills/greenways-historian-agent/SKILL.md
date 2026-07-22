@@ -29,11 +29,11 @@ gw-historian update .
 3. Select the narrowest query:
 
 ```bash
-greenways-historian retrieve "query terms"
-greenways-historian similar "namespace/qualified-name"
-greenways-historian changes "commit or path terms"
+gw-historian retrieve "query terms"
+gw-historian similar "namespace/qualified-name"
+gw-historian changes "commit or path terms"
 gw-historian history "namespace/qualified-name"
-greenways-historian trace "revision-id"
+gw-historian trace "revision-id"
 ```
 
 Use `retrieve` for broad context, `history` for chronological symbol
@@ -50,7 +50,7 @@ For a source tree outside Git history:
 
 ```bash
 bb ingest:kondo /path/to/src
-greenways-historian ingest /tmp/analysis.jsonl /path/to/repository
+gw-historian ingest /tmp/analysis.jsonl /path/to/repository
 ```
 
 ## Reporting
@@ -80,3 +80,7 @@ authoritative for this skill.
 Configure `javascript` and `typescript` to use `bun analyzers/typescript/src/analyzer.js`. The worker supports `.js`, `.jsx`, `.mjs`, `.cjs`, `.ts`, `.tsx`, and `.d.ts` and emits normalized declaration shapes, structural hashes, imports, calls, type references, and diagnostics through the existing JSONL protocol.
 
 Treat the initial results as blob-local historical facts. Do not infer successful project-wide module or type resolution from an import reference until project-aware indexing is added.
+
+## Python workflow
+
+Configure `python` to use `python3 analyzers/python/src/analyzer.py`. The worker supports `.py`, `.pyi`, and `.pyw`, uses the standard-library `ast` and `tokenize` modules, and emits normalized declarations, structural features, imports, calls, reads, writes, type references, inheritance, and diagnostics through the existing protocol.

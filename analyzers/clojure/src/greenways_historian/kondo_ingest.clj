@@ -4,7 +4,7 @@
             [clojure.string :as str]
             [greenways-historian.kondo-analyzer :as analyzer]))
 
-(def supported-extensions #{".clj" ".cljs" ".cljc" ".bb"})
+(def supported-extensions #{".clj" ".bb"})
 
 (defn extension [path]
   (some #(when (str/ends-with? path %) %) supported-extensions))
@@ -16,7 +16,7 @@
          (not (str/starts-with? path ".#")))))
 
 (defn language-for [path]
-  (if (str/ends-with? path ".cljs") "clojurescript" "clojure"))
+  (if (str/ends-with? path ".bb") "babashka" "clojure"))
 
 (defn relative-path [root file]
   (-> (.relativize (.toPath root) (.toPath file))

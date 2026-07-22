@@ -4,6 +4,8 @@ import { createRevisionDocumentWriter, createSearchWriter } from "./search.js";
 
 function hash(value) { return createHash("sha256").update(JSON.stringify(value)).digest("hex"); }
 
+export function analysisConfigHash(config = {}) { return hash(config); }
+
 function createStatements(db) {
   return {
     insertRun: db.query(`INSERT OR IGNORE INTO analyzer_runs(repository_id, blob_oid, analyzer_fingerprint, config_hash, status) VALUES (?, ?, ?, ?, 'complete')`),
@@ -12,6 +14,13 @@ function createStatements(db) {
     insertFile: db.query("INSERT OR IGNORE INTO file_analyses(analyzer_run_id, path, language, result_json) VALUES (?, ?, ?, ?)"),
     getLocation: db.query(`SELECT 1 FROM locations l JOIN revisions r ON r.id = l.revision_id
                            WHERE r.logical_symbol_id = ? AND l.commit_oid = ? AND l.path = ? LIMIT 1`),
+    getLocationsForPath: db.query(`SELECT r.id AS revision_id, r.logical_symbol_id
+                                   FROM locations l JOIN revisions r ON r.id = l.revision_id
+                                   WHERE l.path = ?
+                                   GROUP BY r.logical_symbol_id
+                                   ORDER BY MAX(l.rowid) DESC`),
+    getDeletion: db.query("SELECT 1 FROM transitions WHERE repository_id = ? AND from_revision_id = ? AND commit_oid = ? AND kind = 'deleted' LIMIT 1"),
+    getPriorDeletion: db.query("SELECT 1 FROM transitions WHERE from_revision_id = ? AND kind = 'deleted' ORDER BY id DESC LIMIT 1"),
     getPrior: db.query("SELECT r.id, r.structural_hash FROM revisions r WHERE r.logical_symbol_id = ? ORDER BY rowid DESC LIMIT 1"),
     getLatestLocation: db.query("SELECT path FROM locations WHERE revision_id = ? ORDER BY rowid DESC LIMIT 1"),
     insertLogical: db.query("INSERT OR IGNORE INTO logical_symbols(id, repository_id, language, qualified_name, kind) VALUES (?, ?, ?, ?, ?)"),
@@ -79,7 +88,15 @@ export function persistAnalysis(db, { repositoryId, commitOid, path, analysis, a
       lastCommitOid: commitOid,
       content: [symbol.name, symbol.signature, JSON.stringify(symbol.structure ?? {})].filter(Boolean).join(" ")
     });
-    const transitionKind = prior ? (prior.structural_hash === symbol.structural_hash ? "unchanged" : "modified") : "introduced";
+    const transitionKind = !prior
+      ? "introduced"
+      : statements.getPriorDeletion.get(prior.id)
+        ? "resurrected"
+      : prior.structural_hash !== symbol.structural_hash
+        ? "modified"
+        : priorLocation?.path !== path
+          ? "moved"
+          : "unchanged";
     statements.insertTransition
       .run(repositoryId, prior?.id ?? null, revision, commitOid, transitionKind, JSON.stringify({ exact: true }));
     if (!prior || prior.structural_hash !== symbol.structural_hash || priorLocation?.path !== path) {
@@ -93,4 +110,17 @@ export function persistAnalysis(db, { repositoryId, commitOid, path, analysis, a
       .run(ownerId, commitOid, reference.kind, reference.target_text ?? null, reference.target_qualified_name ?? null, reference.resolution, reference.confidence, JSON.stringify(reference.range));
   }
   return { analyzerRunId: run.id, fileAnalysisId: fileAnalysis.id, symbolCount: analysis.symbols.length, referenceCount: analysis.references.length };
+}
+
+export function persistDeletions(db, { repositoryId, commitOid, paths, statements = createStatements(db) }) {
+  let deleted = 0;
+  for (const path of new Set(paths)) {
+    for (const location of statements.getLocationsForPath.all(path)) {
+      if (statements.getDeletion.get(repositoryId, location.revision_id, commitOid)) continue;
+      statements.insertTransition
+        .run(repositoryId, location.revision_id, null, commitOid, "deleted", JSON.stringify({ exact: true, path }));
+      deleted += 1;
+    }
+  }
+  return deleted;
 }

@@ -38,6 +38,11 @@ export async function repositoryObjectFormat(repository) {
 }
 
 export async function* walkCommits(repository, refs = ["HEAD"]) {
+  const shallowCheck = await spawnGit(repository, ["rev-parse", "--is-shallow-repository"]);
+  const shallow = (await new Response(shallowCheck.stdout).text()).trim();
+  const shallowError = (await new Response(shallowCheck.stderr).text()).trim();
+  if (await shallowCheck.exited !== 0) throw new Error(shallowError || "unable to determine whether Git repository is shallow");
+  if (shallow === "true") throw new Error("Git repository is shallow; complete history is required");
   const process = await spawnGit(repository, ["rev-list", "--parents", "--topo-order", "--reverse", ...refs]);
   for await (const line of linesFrom(process.stdout)) {
     if (!line) continue;

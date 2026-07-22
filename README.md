@@ -11,6 +11,7 @@ embedding service is required for the core workflow.
 
 - Bun 1.2.18 or newer
 - Git 2.43 or newer
+- Python 3.10 or newer for Python analysis (standard library only)
 - Babashka 1.12.218 or newer for Clojure analysis
 - clj-kondo for the primary Clojure analyzer
 
@@ -57,17 +58,22 @@ gw-historian update /path/to/repository
 Query the indexed history:
 
 ```bash
-greenways-historian search "qualified symbol"
-greenways-historian retrieve "historical context"
-greenways-historian similar "example.core/answer"
-greenways-historian changes "parser rename"
+gw-historian search "qualified symbol"
+gw-historian retrieve "historical context"
+gw-historian similar "example.core/answer"
+gw-historian changes "parser rename"
 gw-historian history "example.core/answer"
-greenways-historian trace "revision-id"
+gw-historian trace "revision-id"
 ```
 
 The database is stored at `.greenways-historian/index.sqlite` by default. It
 uses SQLite WAL mode and content-addressed analyzer results. Re-running
 `update` processes only new commits and changed blobs.
+
+See [`docs/operations.md`](docs/operations.md) for backups, recovery,
+performance sizing, and troubleshooting. See
+[`docs/analyzer-authoring.md`](docs/analyzer-authoring.md) for the analyzer
+protocol and conformance workflow.
 
 ## Multiple repositories
 
@@ -122,6 +128,9 @@ Kimi documentation: <https://www.kimi.com/code/docs/en/kimi-code-cli/customizati
 bun run doctor
 bun run check
 bun run conformance
+bun run conformance:typescript
+bun run conformance:python
+bun run benchmark:validate
 bun run fixture:large /tmp/greenways-historian-large-fixture 250
 bun run fixture:validate /tmp/greenways-historian-large-fixture /tmp/greenways-historian-large.sqlite 250
 ```
@@ -139,3 +148,9 @@ Apache-2.0
 Historian can analyze JavaScript and TypeScript blobs with the bundled Bun worker. It supports `.js`, `.jsx`, `.mjs`, `.cjs`, `.ts`, `.tsx`, and `.d.ts` files and emits the same symbol, reference, diagnostic, and structural-feature protocol used by the Clojure analyzer.
 
 The first implementation is intentionally blob-local: it extracts declarations, imports, calls, type references, inheritance, and normalized AST shape without requiring a project build or an LLM. Project-wide module and type resolution can be layered on later without changing the historical storage contract.
+
+## Python analysis
+
+Historian can analyze Python blobs with the bundled `python3` worker. It supports `.py`, `.pyi`, and `.pyw` files and emits declarations, imports, calls, reads, writes, type references, inheritance, diagnostics, and deterministic structural features through the same JSONL analyzer protocol.
+
+The worker uses Python's standard-library `ast` parser and `tokenize` module, so Python analysis does not require installing a third-party AST package. Configure it with `python3 analyzers/python/src/analyzer.py`.

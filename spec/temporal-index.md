@@ -3,8 +3,9 @@
 ## Invariants
 
 Git is the authoritative content and ancestry store. SQLite stores extracted
-facts and lineage. Qdrant stores disposable retrieval projections. Rebuilding
-Qdrant from Git and SQLite MUST produce an equivalent index.
+facts, lineage, and deterministic retrieval projections. No external retrieval
+service is required; rebuilding SQLite from Git and analyzer outputs MUST
+produce an equivalent index.
 
 The index MUST NOT store a repository snapshot per commit or a transitive
 commit closure. Work and storage scale with commits, changed paths, distinct
@@ -67,10 +68,10 @@ explicit garbage collection.
 
 ## Bounded execution
 
-The coordinator uses bounded queues for blob reads, analyzers, embeddings, and
-Qdrant writes. SQLite uses WAL mode and one batched writer. A checkpoint is
-committed atomically with every batch and records ref head, last completed
-commit, analyzer fingerprint, schema version, and embedding fingerprint.
+The coordinator uses bounded queues for blob reads and analyzers. SQLite uses
+WAL mode and one batched writer. A checkpoint is committed atomically with
+every batch and records ref head, last completed commit, analyzer fingerprint,
+and schema version.
 
 Restart resumes at the last committed batch. A changed fingerprint invalidates
 only dependent projections. Peak memory is bounded by queue limits and maximum
@@ -78,16 +79,7 @@ artifact size, not history size.
 
 ## Retrieval projections
 
-`code_current` contains one point per current symbol chunk. `code_history`
-contains immutable semantic revisions and meaningful transitions. Oversized
-symbols use deterministic 16 KiB UTF-8 chunks with 1 KiB overlap and repeated
-symbol header context.
-
-Qdrant payloads contain repository, symbol, revision, commit, language, kind,
-qualified name, path, signature, documentation, chunk position, change type,
-and bounded retrieval text. Full source remains in Git.
-
-Dense Qdrant retrieval is fused through reciprocal-rank fusion with SQLite
-FTS5 identifier and path retrieval. History and trace results are then expanded
-deterministically through SQLite lineage and reference edges.
-
+SQLite FTS5 stores bounded symbol-revision and commit-change documents. Direct
+lexical search is combined with structural, metadata, and lineage evidence.
+History and trace results are expanded deterministically through SQLite
+transitions and reference edges. Full source remains in Git.

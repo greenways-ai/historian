@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Greenways Historian configuration",
   "type": "object",
-  "required": ["history", "analyzers", "qdrant", "embedding"],
+  "required": ["history", "analyzers"],
   "properties": {
     "history": {
       "type": "object",
@@ -12,23 +12,7 @@
         "includeMergedCommits": { "type": "boolean", "default": true }
       }
     },
-    "analyzers": { "type": "object", "minProperties": 1 },
-    "qdrant": {
-      "type": "object",
-      "required": ["url"],
-      "properties": { "url": { "type": "string", "format": "uri" } }
-    },
-    "embedding": {
-      "type": "object",
-      "required": ["provider", "baseUrl", "apiKeyEnv", "model", "dimensions"],
-      "properties": {
-        "provider": { "const": "openai-compatible" },
-        "baseUrl": { "type": "string" },
-        "apiKeyEnv": { "type": "string" },
-        "model": { "type": "string" },
-        "dimensions": { "type": "integer", "minimum": 1 }
-      }
-    }
+    "analyzers": { "type": "object", "minProperties": 1 }
   },
   "additionalProperties": false
 }

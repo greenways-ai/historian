@@ -9,6 +9,7 @@
   "files": [
     "src",
     "analyzers",
+    "docs",
     "skills",
     "spec",
     "bb.edn",
@@ -34,8 +35,12 @@
     "analyzer:test": "bb -cp analyzers/clojure/src:analyzers/clojure/test analyzers/clojure/test/greenways_historian/analyzer_test.clj",
     "conformance": "bun src/cli.js analyzer check bb -cp analyzers/clojure/src -m greenways-historian.analyzer",
     "conformance:typescript": "bun src/cli.js analyzer check bun analyzers/typescript/src/analyzer.js --fixture spec/conformance/typescript.json",
+    "conformance:python": "bun src/cli.js analyzer check python3 analyzers/python/src/analyzer.py --fixture spec/conformance/python.json",
     "benchmark": "bun benchmarks/index.js",
+    "benchmark:validate": "bun scripts/validate-large-history.js",
     "fixture:large": "bun benchmarks/generate-history-fast.js",
+    "fixture:typescript": "bun benchmarks/generate-typescript-history.js",
+    "fixture:validate:typescript": "bun scripts/validate-typescript-history.js",
     "check": "bun test && bun run analyzer:test && bb run analyzer:kondo:test",
     "fixture:validate": "bun scripts/validate-fixture.js"
   },

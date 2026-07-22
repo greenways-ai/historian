@@ -7,7 +7,7 @@
   "analyzers": {
     "clojure": {
       "command": ["bb", "-cp", "analyzers/clojure/src", "-m", "greenways-historian.analyzer"],
-      "extensions": [".clj", ".cljs", ".cljc", ".bb"]
+      "extensions": [".clj", ".bb"]
     },
     "javascript": {
       "command": ["bun", "analyzers/typescript/src/analyzer.js"],
@@ -16,16 +16,10 @@
     "typescript": {
       "command": ["bun", "analyzers/typescript/src/analyzer.js"],
       "extensions": [".ts", ".tsx", ".d.ts"]
+    },
+    "python": {
+      "command": ["python3", "analyzers/python/src/analyzer.py"],
+      "extensions": [".py", ".pyi", ".pyw"]
     }
-  },
-  "qdrant": {
-    "url": "http://127.0.0.1:6333"
-  },
-  "embedding": {
-    "provider": "openai-compatible",
-    "baseUrl": "${EMBEDDING_BASE_URL}",
-    "apiKeyEnv": "EMBEDDING_API_KEY",
-    "model": "${EMBEDDING_MODEL}",
-    "dimensions": 1536
   }
 }

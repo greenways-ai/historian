@@ -12,6 +12,11 @@ function sourceBytes(source) {
   return new TextEncoder().encode(source).byteLength;
 }
 
+function pathForResponse(response, path) {
+  if (!response?.result?.file) return response;
+  return { ...response, result: { ...response.result, file: { ...response.result.file, path } } };
+}
+
 class AnalyzerWorker {
   constructor(command) {
     this.command = command;
@@ -115,7 +120,7 @@ export class AnalyzerPool {
       const response = this.cache.get(key);
       this.cache.delete(key);
       this.cache.set(key, response);
-      return response;
+      return pathForResponse(response, path);
     }
     const request = { protocol_version: "1.0", request_id: key, op: "analyze", language, path, blob_oid, source, config };
     const worker = await this.workerFor(command);

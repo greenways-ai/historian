@@ -2,6 +2,6 @@
   "name": "typescript-basic",
   "language": "typescript",
   "path": "fixtures/example.ts",
-  "source": "import { inc } from './math.js';\nexport interface User { id: string; }\nexport const greet = (user: User): string => inc(user.id.length).toString();\n",
-  "expected": { "symbol_names": ["example/greet", "example/User"], "reference_targets": ["./math.js", "inc", "User"] }
+  "source": "import { inc } from './math.js';\nexport interface User { id: string; }\nconst label = 'café';\nexport const greet = (user: User): string => inc(user.id.length).toString();\nexport const résumé = (user: User): string => `${label}:${user.id}`;\n",
+  "expected": { "symbol_names": ["example/greet", "example/User"], "reference_targets": ["./math.js", "inc", "User"], "utf8_symbol_name": "résumé" }
 }

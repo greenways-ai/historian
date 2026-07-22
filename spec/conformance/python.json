@@ -1,0 +1,11 @@
+{
+  "name": "python-basic",
+  "language": "python",
+  "path": "fixtures/example.py",
+  "source": "from math import sqrt\nclass User:\n    \"\"\"A user.\"\"\"\n    def greet(self, value: int) -> str:\n        return str(sqrt(value))\nrésumé = \"café\"\n",
+  "expected": {
+    "symbol_names": ["example/User", "example/greet"],
+    "reference_targets": ["math", "sqrt", "User"],
+    "utf8_symbol_name": "résumé"
+  }
+}

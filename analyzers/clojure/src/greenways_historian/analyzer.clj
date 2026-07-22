@@ -134,7 +134,7 @@
        vec))
 
 (defn analyze-source [{:keys [language path blob_oid source]}]
-  (when-not (contains? #{"clojure" "clojurescript"} language)
+  (when-not (contains? #{"clojure" "babashka"} language)
     (throw (ex-info "unsupported language" {:code "unsupported_language"})))
   (when (> (byte-count source) max-message-bytes)
     (throw (ex-info "source exceeds analyzer limit" {:code "too_large"})))
@@ -159,8 +159,8 @@
   {:name "greenways-historian-clojure"
    :version analyzer-version
    :protocol_versions [protocol-version]
-   :languages ["clojure" "clojurescript"]
-   :extensions [".clj" ".cljs" ".cljc" ".bb"]
+   :languages ["clojure" "babashka"]
+   :extensions [".clj" ".bb"]
    :capabilities ["symbols" "calls" "structural_hashes" "structural_features" "partial_parse"]
    :max_message_bytes max-message-bytes
    :fingerprint (sha256 (str analyzer-version ":rewrite-clj-1.2.55"))})

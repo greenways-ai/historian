@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 
 import { parseArgs } from "node:util";
-import { resolve } from "node:path";
+import { dirname, resolve } from "node:path";
 import { access } from "node:fs/promises";
 import { Database } from "bun:sqlite";
 import { runAnalyzerConformance } from "./analyzer-conformance.js";
@@ -17,7 +17,30 @@ import { retrieveContext } from "./retrieval.js";
 import { repairAnalysisGaps } from "./repair.js";
 
 const VERSION = "0.1.0";
-const PACKAGE_ROOT = resolve(import.meta.dir, "..");
+let packageRoot;
+
+async function getPackageRoot() {
+  if (packageRoot) return packageRoot;
+  const candidates = [
+    process.env.HISTORIAN_PACKAGE_ROOT,
+    resolve(import.meta.dir, ".."),
+    resolve(dirname(process.execPath), ".."),
+    process.cwd()
+  ].filter(Boolean);
+  for (const candidate of candidates) {
+    try {
+      await Promise.all([
+        access(resolve(candidate, "bb.edn")),
+        access(resolve(candidate, "analyzers/clojure/src")),
+        access(resolve(candidate, "skills/greenways-historian-agent/SKILL.md"))
+      ]);
+      packageRoot = candidate;
+      return packageRoot;
+    } catch {}
+  }
+  packageRoot = candidates[0] ?? process.cwd();
+  return packageRoot;
+}
 
 async function loadConfiguration(path = "greenways-historian.json") {
   try { return await Bun.file(path).json(); }
@@ -37,12 +60,14 @@ async function commandVersion(command, args = ["--version"], options = {}) {
 }
 
 async function doctor() {
+  const root = await getPackageRoot();
   const checks = await Promise.all([
     { command: "bun", ok: true, version: Bun.version },
     commandVersion("git"),
+    commandVersion("python3"),
     commandVersion("bb"),
     commandVersion("clj-kondo"),
-    commandVersion("bb", ["-e", "(require '[rewrite-clj.zip]) (println \"rewrite-clj loaded\")"], { cwd: PACKAGE_ROOT })
+    commandVersion("bb", ["-e", "(require '[rewrite-clj.zip]) (println \"rewrite-clj loaded\")"], { cwd: root })
       .then((check) => ({ ...check, command: "rewrite-clj", version: check.ok ? "loaded through babashka" : check.version ?? check.error })),
     fetch("http://127.0.0.1:6333/healthz")
       .then((response) => ({ command: "qdrant", ok: response.ok, version: response.statusText }))
@@ -56,11 +81,12 @@ async function doctor() {
 
   try {
     await Promise.all([
-      access(resolve(PACKAGE_ROOT, "bb.edn")),
-      access(resolve(PACKAGE_ROOT, "analyzers/clojure/src")),
-      access(resolve(PACKAGE_ROOT, "skills/greenways-historian-agent/SKILL.md"))
+      access(resolve(root, "bb.edn")),
+      access(resolve(root, "analyzers/clojure/src")),
+      access(resolve(root, "analyzers/python/src")),
+      access(resolve(root, "skills/greenways-historian-agent/SKILL.md"))
     ]);
-    checks.push({ command: "package", ok: true, version: PACKAGE_ROOT });
+    checks.push({ command: "package", ok: true, version: root });
   } catch {
     checks.push({ command: "package", ok: false, error: "greenways-historian package assets are incomplete" });
   }
@@ -72,13 +98,19 @@ async function doctor() {
 }
 
 function usage() {
-  console.log(`gw-historian ${VERSION}\n\nUsage:\n  gw-historian doctor\n  gw-historian analyzer check <command...>\n  greenways-historian --version\n`);
+  console.log(`gw-historian ${VERSION}\n\nUsage:\n  gw-historian doctor\n  gw-historian doctor recovery [repository] [database]\n  gw-historian analyzer check <command...>\n  gw-historian trace <symbol-or-query> [database] [max-depth] [max-paths] [sink...]\n  gw-historian --version\n`);
 }
 
 const { positionals, values } = parseArgs({
   allowPositionals: true,
   strict: false,
-  options: { version: { type: "boolean", short: "v" }, help: { type: "boolean", short: "h" } }
+  options: {
+    version: { type: "boolean", short: "v" },
+    help: { type: "boolean", short: "h" },
+    "max-depth": { type: "string" },
+    "max-paths": { type: "string" },
+    sink: { type: "string", multiple: true }
+  }
 });
 
 if (values.version) {
@@ -86,7 +118,7 @@ if (values.version) {
 } else if (values.help || positionals.length === 0) {
   usage();
 } else if (positionals[0] === "doctor" && positionals[1] === "recovery") {
-  console.log(JSON.stringify(await inspectRecovery()));
+  console.log(JSON.stringify(await inspectRecovery(positionals[2] ?? ".", positionals[3] ?? ".greenways-historian/index.sqlite")));
 } else if (positionals[0] === "doctor") {
   process.exitCode = await doctor();
 } else if (positionals[0] === "analyzer" && positionals[1] === "check") {
@@ -158,8 +190,15 @@ if (values.version) {
   try { console.log(JSON.stringify(resolveHistory(db, positionals.slice(1).join(" ")))); }
   finally { db.close(); }
 } else if (positionals[0] === "trace") {
-  const db = await openDatabase();
-  try { console.log(JSON.stringify(traceGraph(db, positionals[1]))); }
+  const db = await openDatabase(positionals[2] ?? ".greenways-historian/index.sqlite");
+  try {
+    const positionalSinks = positionals.slice(5);
+    console.log(JSON.stringify(traceGraph(db, positionals[1], {
+      maxDepth: values["max-depth"] ?? positionals[3],
+      maxPaths: values["max-paths"] ?? positionals[4],
+      sinks: [...(values.sink ?? []), ...positionalSinks]
+    })));
+  }
   finally { db.close(); }
 } else {
   console.error(`Unknown command: ${positionals[0]}`);
